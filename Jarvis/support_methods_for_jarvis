@@ -1,0 +1,24 @@
+def try_find_chrome_path():
+    result = None
+    if _winreg:
+        for subkey in ['ChromeHTML\\shell\\open\\command', 'Applications\\chrome.exe\\shell\\open\\command']:
+            try: result = _winreg.QueryValue(_winreg.HKEY_CLASSES_ROOT, subkey)
+            except WindowsError: pass
+            if result is not None:
+                result_split = shlex.split(result, False, True)
+                result = result_split[0] if result_split else None
+                if os.path.isfile(result):
+                    break
+                result = None
+    else:
+        expected = "google-chrome" + (".exe" if os.name == 'nt' else "")
+        for parent in os.environ.get('PATH', '').split(os.pathsep):
+            path = os.path.join(parent, expected)
+            if os.path.isfile(path):
+                result = path
+                break
+    return result
+
+    '''correct the errors 
+    Note: You should do this only if we specifically need Chrome and not a default 
+    browser, or Chromium , or something else'''
